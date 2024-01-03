@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, Dimensions, TextInput, Image, Alert, TouchableOpacity, ScrollView, ImageBackground, Button, StatusBar, ActivityIndicator} from 'react-native'
+import {View, Text, StyleSheet, Dimensions, TextInput, Image, Alert, TouchableWithoutFeedback, TouchableOpacity, ScrollView, ImageBackground, Modal, Button, StatusBar, ActivityIndicator} from 'react-native'
 import React, {useState, useEffect}from 'react'
 import  {SafeAreaView} from 'react-native-safe-area-context'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -6,7 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { setItem, getItem } from '../utils/asyncStorage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 
 const{width, height} = Dimensions.get('window');
@@ -23,11 +24,13 @@ const Custom = ({}) => {
   const [aquariumName1, setaquariumname1] = useState('');
   const [waterLevel, setwaterlevel] = useState('');
   const [microalgae, setmicroalgae] = useState(null);
+  const [concentration, setconcentration] = useState(null);
   const [idnum, setIdnum] = useState('0');
   const [month, setmonth] = useState('');
   const [day, setday] = useState('');
   const [year, setyear] = useState('');  
   const [userdate1, setuserdate1] = useState(''); 
+  const [websocketip, setwebsocketip] = useState('');
   //console.log(aquariumName)
   //console.log(waterLevel)
 
@@ -105,6 +108,19 @@ const Custom = ({}) => {
     {label:'2033', value:'2033'},
   ];
 
+  const concentration1 = [
+    {label:'10%', value:'10%'},
+    {label:'20%', value:'20%'},
+    {label:'30%', value:'30%'},
+    {label:'40%', value:'40%'},
+    {label:'50%', value:'50%'},
+    {label:'60%', value:'60%'},
+    {label:'70%', value:'70%'},
+    {label:'80%', value:'80%'},
+    {label:'90%', value:'90%'},
+    {label:'100%', value:'100%'},
+  ];
+
   const checkTextInput = async () => {
     //Check for the Name TextInput
     if (!aquariumName1) {
@@ -114,6 +130,10 @@ const Custom = ({}) => {
     //Check for the Email TextInput
     if (!waterLevel || waterLevel == 0) {
       alert('Please Enter the Water Level');
+      return;
+    }
+    if (!concentration) {
+      alert('Please Select Concentration');
       return;
     }
     if (!microalgae) {
@@ -132,10 +152,34 @@ const Custom = ({}) => {
       alert('Please Select Year');
       return;
     }
+    if (!websocketip) {
+      alert('Please Enter the IP Address');
+      return;
+    }
     //setuserdate1(month + '/' + day + '/' + year)
+    var date1 = new Date().getDate(); //Current Date
+    var month1 = new Date().getMonth() + 1; //Current Month
+    var year1 = new Date().getFullYear(); //Current Year
+    console.log('h', date1)
+    if (parseInt(year) < year1) {
+      alert('Please Set The Date In Present Or In Future');
+      return;
+    }
     
+    if (parseInt(year) === year1 && parseInt(month) < month1) {
+      alert('Please Set The Date In Present Or In Future');
+      return;
+    }
+    
+    if (parseInt(year) === year1 && parseInt(month) === month1 && parseInt(day) < date1) {
+      alert('Please Set The Date In Present Or In Future');
+      return;
+    }
+
+
     setItem('aquariumname', aquariumName1)
     setItem('waterINgallon', waterLevel)
+    setItem('concentration', concentration)
     setItem('microalgaetype', microalgae)
     setItem('datecultivate', month + '/' + day + '/' + year)
     
@@ -155,6 +199,7 @@ const Custom = ({}) => {
         setItem('umonth', month);
         setItem('uday', day);
         setItem('uyear', year);
+        setItem('websocketip', websocketip)
         console.log('0myidC', currentId)
         console.log('0myiddddddd', await getItem('idbox'))
         break;
@@ -162,6 +207,7 @@ const Custom = ({}) => {
         setItem('umonth1', month);
         setItem('uday1', day);
         setItem('uyear1', year);
+        setItem('websocketip1', websocketip)
         console.log('1myidC', currentId)
         console.log('1myiddddddd', await getItem('idbox'))
         break;
@@ -169,6 +215,7 @@ const Custom = ({}) => {
         setItem('umonth2', month);
         setItem('uday2', day);
         setItem('uyear2', year);
+        setItem('websocketip2', websocketip)
         console.log('myidddddddhehe', currentId)
         console.log('myidddddddhehe', await getItem('idbox'))
         break;
@@ -176,41 +223,49 @@ const Custom = ({}) => {
         setItem('umonth3', month);
         setItem('uday3', day);
         setItem('uyear3', year);
+        setItem('websocketip3', websocketip)
         break;
       case '4':
         setItem('umonth4', month);
         setItem('uday4', day);
         setItem('uyear4', year);
+        setItem('websocketip4', websocketip)
         break;
       case '5':
         setItem('umonth5', month);
         setItem('uday5', day);
         setItem('uyear5', year);
+        setItem('websocketip5', websocketip)
         break;
       case '6':
         setItem('umonth6', month);
         setItem('uday6', day);
         setItem('uyear6', year);
+        setItem('websocketip6', websocketip)
         break;
       case '7':
         setItem('umonth7', month);
         setItem('uday7', day);
         setItem('uyear7', year);
+        setItem('websocketip7', websocketip)
         break;
       case '8':
         setItem('umonth8', month);
         setItem('uday8', day);
         setItem('uyear8', year);
+        setItem('websocketip8', websocketip)
         break;
       case '9':
         setItem('umonth9', month)
         setItem('uday9', day)
         setItem('uyear9', year)
+        setItem('websocketip9', websocketip)
         break;
       case '10':
         setItem('umonth10', month)
         setItem('uday10', day)
         setItem('uyear10', year)
+        setItem('websocketip10', websocketip)
         break;
       // Add cases for other ID values as needed...
       default:
@@ -218,27 +273,30 @@ const Custom = ({}) => {
     }
   
     
-    var date1 = new Date().getDate(); //Current Date
-    var month1 = new Date().getMonth() + 1; //Current Month
-    var year1 = new Date().getFullYear(); //Current Year
-
-    if (year == year1){
-      if (month <= month1){
-        if (day < date1){
-          alert('Please Set The Date In Present Or In Future');
-          return;
-        }
-      }
-    }
+    
     console.log(userdate1)
     DashboardScreen()
   };
-  
-  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisible2, setModalVisible2] = useState(false);
+  const [modalVisible3, setModalVisible3] = useState(false);
+  const [modalVisible4, setModalVisible4] = useState(false);
+  const [modalVisible5, setModalVisible5] = useState(false);
+  const [modalVisible6, setModalVisible6] = useState(false);
+  const closeModal = () => {
+    setModalVisible(false);
+    setModalVisible2(false);
+    setModalVisible3(false);
+    setModalVisible4(false);
+    setModalVisible5(false);
+    setModalVisible6(false);
+  };
+
+
   return( 
     <SafeAreaView style={styles.container}>
       <StatusBar translucent backgroundColor='transparent' barStyle={'dark-content'}/>
-      <ImageBackground style={styles.bg} resizeMode='cover' source={require('../images/bg.jpg')}>
+      <ImageBackground style={styles.bg} resizeMode='cover' source={require('../images/mybg3.gif')}>
         <View style={styles.header}>
           <TouchableOpacity onPress={aboutscreen}>
             <Image style={styles.logo} source={require('../images/logo1.png')} />
@@ -246,28 +304,202 @@ const Custom = ({}) => {
         </View>
 
         <View style={styles.middle}>
+        <View style={styles.aq1}>
           <Text style={styles.aquariumName}>Aquarium Name:</Text>
-          <TextInput 
-            required
-            style={styles.aquariumNameinput}
-            onChangeText={setaquariumname1}
-            value={aquariumName1}
-            placeholder='Name of Aquarium'
-            maxLength={12}
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              setModalVisible(!modalVisible);
+            }}
+          >
+            <TouchableWithoutFeedback onPress={closeModal}>
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  
+                  <Text style={styles.infotext}>Enter the desired name of your aquarium. This will be used in determining your aquarium.</Text>
+                 
+                  <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                    <Text style={styles.infoclose}>Close</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+
+        {/* Icon button to trigger modal */}
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => {
+            setModalVisible(true);
+          }}
+        >
+          {/* Replace the source with your icon */}
+          <Image
+            source={require('../images/info.png')}
+            style={styles.infoIcon}
           />
+        </TouchableOpacity>
+        </View>
+            <TextInput 
+              required
+              style={styles.aquariumNameinput}
+              onChangeText={setaquariumname1}
+              value={aquariumName1}
+              placeholder='e.g LUMOTech'
+              maxLength={12}
+            />
+     
+          <View style={styles.aq1}>
           <Text style={styles.aquariumName}>Water Level:</Text>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible2}
+            onRequestClose={() => {
+              setModalVisible2(!modalVisible2);
+            }}
+          >
+        <TouchableWithoutFeedback onPress={closeModal}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <View style={styles.aqsize1}>
+                <Text style={styles.infotext}>Enter the amount of water based on the size of your aquarium.</Text>
+                <Image source={require('../images/aqsize.png')} style={styles.aqsize}/>
+              </View>
+                 <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                   <Text style={styles.infoclose}>Close</Text>
+                 </TouchableOpacity>
+              
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Icon button to trigger modal */}
+      <TouchableOpacity
+        style={styles.iconButton}
+        onPress={() => {
+          setModalVisible2(true);
+        }}
+      >
+        {/* Replace the source with your icon */}
+        <Image
+          source={require('../images/info.png')}
+          style={styles.infoIcon}
+        />
+      </TouchableOpacity>
+      </View>
           <View style={styles.amtWater}>
             <TextInput 
               style={styles.amountWater}
               onChangeText={setwaterlevel}
               value={waterLevel}
-              placeholder='Amount of Water in gallon'
+              placeholder='e.g. 150 gallons'
               maxLength={3}
               keyboardType="numeric"
             />
             <Text style={styles.gallon}>gal</Text>
+            
           </View>
+          <View style={styles.aq1}>
+          <Text style={styles.aquariumName}>Concentration:</Text>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible6}
+            onRequestClose={() => {
+              setModalVisible6(!modalVisible6);
+            }}
+          >
+        <TouchableWithoutFeedback onPress={closeModal}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+            <Text style={styles.infotext}>Select how many gallons of starter pack you want to put. </Text>
+            <Text style={styles.infotext1}>e.g. If your water level is 10 gallons then your concentration is 70%. 
+            So there is 7gallons of microalgae starter pack and 3 gallons of water.</Text>   
+                 <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                   <Text style={styles.infoclose}>Close</Text>
+                 </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Icon button to trigger modal */}
+      <TouchableOpacity
+        style={styles.iconButton}
+        onPress={() => {
+          setModalVisible6(true);
+        }}
+      >
+        {/* Replace the source with your icon */}
+        <Image
+          source={require('../images/info.png')}
+          style={styles.infoIcon}
+        />
+      </TouchableOpacity>
+      </View>
+          <Dropdown
+            style={styles. dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            inputSearchStyle={styles.inputSearchStyle}
+            iconStyle={styles.iconStyle}
+            data={concentration1}
+            search
+            maxHeight={300}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Concentration"
+            searchPlaceholder="Search..."
+            value={concentration}
+            onChange={item => {
+              setconcentration(item.value);
+            }}
+            renderLeftIcon={() => (
+              <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
+            )}
+          />
+
+        <View style={styles.aq1}>
           <Text style={styles.aquariumName}>Microalgae Type:</Text>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible3}
+            onRequestClose={() => {
+              setModalVisible3(!modalVisible3);
+            }}
+          >
+        <TouchableWithoutFeedback onPress={closeModal}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+            <Text style={styles.infotext}>Select the type of microalgae you are culturing.</Text>
+            <Text style={styles.infotext1}>e.g. chlorella vulgaris</Text>   
+                 <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                   <Text style={styles.infoclose}>Close</Text>
+                 </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      {/* Icon button to trigger modal */}
+      <TouchableOpacity
+        style={styles.iconButton}
+        onPress={() => {
+          setModalVisible3(true);
+        }}
+      >
+        {/* Replace the source with your icon */}
+        <Image
+          source={require('../images/info.png')}
+          style={styles.infoIcon}
+        />
+      </TouchableOpacity>
+      </View>
           <Dropdown
             style={styles. dropdown}
             placeholderStyle={styles.placeholderStyle}
@@ -289,9 +521,43 @@ const Custom = ({}) => {
               <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
             )}
           />
+        <View style={styles.aq1}>
+          <Text style={styles.aquariumName}>Start of Cultivation:</Text>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible4}
+            onRequestClose={() => {
+              setModalVisible4(!modalVisible4);
+            }}
+          >
+        <TouchableWithoutFeedback onPress={closeModal}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+            <Text style={styles.infotext}>Select the date of your cultivation. Cultivation must not be in the past. It should be in the present or future time.</Text>
+                 
+                 <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                   <Text style={styles.infoclose}>Close</Text>
+                 </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
 
-
-          <Text style={styles.aquariumName}>Date of Cultivation:</Text>
+      {/* Icon button to trigger modal */}
+      <TouchableOpacity
+        style={styles.iconButton}
+        onPress={() => {
+          setModalVisible4(true);
+        }}
+      >
+        {/* Replace the source with your icon */}
+        <Image
+          source={require('../images/info.png')}
+          style={styles.infoIcon}
+        />
+      </TouchableOpacity>
+      </View>
           <View style={styles.date}>
           <Dropdown
             style={styles.datepicker}
@@ -356,9 +622,60 @@ const Custom = ({}) => {
               <AntDesign style={styles.icon} color="black" name="Safety" size={20} />
             )}
           />
+          
             
             
           </View>
+
+          <View style={styles.aq1}>
+          <Text style={styles.aquariumName}>WebSocket IP Adrress:</Text>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible5}
+            onRequestClose={() => {
+              setModalVisible5(!modalVisible5);
+            }}
+          >
+          <TouchableWithoutFeedback onPress={closeModal}>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+              <Text style={styles.infotext}>Enter the ip address located outside of the box. Each box has its own unique ip address.</Text>
+              <Text style={styles.infotext1}>e.g. 192.168.130.94</Text>
+                 <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                   <Text style={styles.infoclose}>Close</Text>
+                 </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
+
+        {/* Icon button to trigger modal */}
+        <TouchableOpacity
+          style={styles.iconButton}
+          onPress={() => {
+            setModalVisible5(true);
+          }}
+        >
+          {/* Replace the source with your icon */}
+          <Image
+            source={require('../images/info.png')}
+            style={styles.infoIcon}
+          />
+        </TouchableOpacity>
+      </View>
+          <TextInput 
+            required
+            style={styles.aquariumNameinput}
+            onChangeText={setwebsocketip}
+            value={websocketip}
+            placeholder='000.000.000.000'
+            maxLength={15}
+            keyboardType="numeric"
+          />
+
+
+
           <View style={styles.saveButton}>
           <TouchableOpacity onPress={checkTextInput}style={styles.start} >
             <Text style={styles.save}>Save</Text>
@@ -413,9 +730,12 @@ const styles = StyleSheet.create({
     height:hp(5),
   },
   middle:{
-    flex: 15,
+    flex: 18,
     //backgroundColor: 'tomato',
     //alignItems:'center',
+  },
+  aq1:{
+    flexDirection:'row'
   },
   aquariumName:{
     fontSize:hp(2.5),
@@ -433,6 +753,77 @@ const styles = StyleSheet.create({
     paddingLeft: hp(3),
     paddingRight: hp(3),
     fontSize: hp(2)
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: hp(3),
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: hp(2),
+    maxWidth: wp(85),
+  },
+  infotext:{
+    fontSize:hp(1.7),
+    alignSelf:'flex-start',
+  },
+  infotext1:{
+    fontSize:hp(1.7),
+    paddingTop:hp(1),
+    alignSelf:'flex-start',
+    fontStyle:'italic'
+  },
+  infotext2:{
+    fontSize:hp(1.7),
+    alignSelf:'flex-start',
+    paddingTop:hp(1),
+    paddingRight:wp(5)
+  },
+  infotext3:{
+    fontSize:hp(1.7),
+    alignSelf:'flex-start',
+    paddingLeft: wp(5)
+  },
+  infoclose:{
+    fontSize:hp(1.7),
+    fontWeight:'bold'
+  },
+  closeButton: {
+    alignSelf: 'center',
+    paddingTop: hp(3),
+    //backgroundColor: 'red'
+  },
+  iconButton: {
+    marginTop:hp(2), 
+    marginLeft: hp(2),
+    
+  },
+  infoIcon: {
+    height: hp(3),
+    width:wp(7),
+    resizeMode: 'contain',
+    //backgroundColor:'yellow'
+  },
+  aqsize:{
+    height: hp(50),
+    width:wp(80),
+    resizeMode: 'contain',
+    //backgroundColor:'yellow',
+  },
+  aqsize1:{
+    //backgroundColor:'yellow'
   },
   amountWater: {
     height: hp(5),
@@ -469,7 +860,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     justifyContent:'center',
-    marginTop: hp(25) 
+    marginTop: hp(5) 
   },
   save:{
     fontSize: hp(2)

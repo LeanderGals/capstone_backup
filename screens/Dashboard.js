@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, Dimensions, Image, Alert, TouchableOpacity, ScrollView, ImageBackground, Button, StatusBar, FlatList} from 'react-native'
+import {View, Text, StyleSheet, Dimensions, Image, Alert, Modal, TouchableOpacity, ScrollView, ImageBackground, Button, StatusBar, FlatList} from 'react-native'
 import React, {useState, useEffect}from 'react'
 import  {SafeAreaView} from 'react-native-safe-area-context'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -6,6 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import { getItem } from '../utils/asyncStorage.js';
 import { clearAsyncStorage } from '../utils/asyncStorage.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 
 
 
@@ -17,16 +19,12 @@ const Dashboard = () => {
   const aboutscreen = async ()=>{
     navigation.push('About');
   }
-  const AlertPage = async ()=>{
-    navigation.push('Alert');
+  const LogsPage = async ()=>{
+    navigation.push('Logs');
   }
   const customscreen = async ()=>{
     navigation.push('Custom');
   } 
-
-  const HomePage = async ()=>{
-    navigation.navigate('HomePage')
-  }
 
 
   const [aquariumData, setAquariumData] = useState([]);
@@ -64,8 +62,10 @@ const Dashboard = () => {
         idbox: await getItem('idbox'),
         aquariumName: await getItem('aquariumname'),
         waterLevel: await getItem('waterINgallon'),
+        concentration: await getItem('concentration'),
         microalgaeType: await getItem('microalgaetype'),
         cultivationDate: await getItem('datecultivate'),
+        webaddress: await getItem('websocketip')
       };
   
       // Get the current aquarium data from AsyncStorage
@@ -80,6 +80,7 @@ const Dashboard = () => {
           (data) =>
             data.aquariumName === newData.aquariumName &&
             data.waterLevel === newData.waterLevel &&
+            data.concentration === newData.concentration &&
             data.microalgaeType === newData.microalgaeType &&
             data.cultivationDate === newData.cultivationDate
         );
@@ -107,18 +108,58 @@ const Dashboard = () => {
     }
   };
   console.log(aquariumData)
+
+
+  const [selectedAquariumId, setSelectedAquariumId] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+    const toggleModal = (aquariumId) => {
+      setSelectedAquariumId(aquariumId);
+      setModalVisible(!modalVisible);
+    };
   
+    const deleteAquarium = async (aquariumId) => {
+      try {
+        const storedData = await AsyncStorage.getItem('aquariumData');
+        let currentAquariumData = [];
+  
+        if (storedData !== null) {
+          currentAquariumData = JSON.parse(storedData);
+  
+          // Filter out the aquarium box to be deleted based on its ID
+          const updatedAquariumData = currentAquariumData.filter(
+            (data) => data.idbox !== aquariumId
+          );
+  
+          // Update AsyncStorage with the updated data (without the deleted box)
+          await AsyncStorage.setItem(
+            'aquariumData',
+            JSON.stringify(updatedAquariumData)
+          );
+  
+          // Update the state with the updated data (refresh the list)
+          setAquariumData(updatedAquariumData);
+        }
+      } catch (error) {
+        console.error('Error deleting aquarium box:', error);
+      }
+    };
+
+
   const renderAquariums = () => {
     const filteredAquariumData = aquariumData.filter(
       (data) =>
         data.aquariumName !== null &&
         data.waterLevel !== null &&
         data.waterLevel !== '' &&
+        data.concentration !== null &&
+        data.concentration !== '' &&
         data.microalgaeType !== null &&
         data.microalgaeType !== '' &&
         data.cultivationDate !== null &&
         data.cultivationDate !== ''
     );
+    
     const navigateToHomePage = async (idboxValue) => {
       try {
         // Save the idboxValue to AsyncStorage before navigating to HomePage
@@ -128,9 +169,11 @@ const Dashboard = () => {
         console.error('Error saving idbox value:', error);
       }
     };
+    
+
     return filteredAquariumData.map((data, index) => (
       <TouchableOpacity style={styles.aquarium1} key={index} onPress={() => navigateToHomePage(data.idbox)}>
-        <Image style={styles.a1} source={require('../images/turbidity.png')} />
+        <Image style={styles.a1} source={require('../images/aquariumdp.gif')} />
         <View style={styles.aqua}>
           <Text style={styles.details}>
             Aquarium Name: <Text style={styles.details1}>{data.aquariumName}</Text>
@@ -139,15 +182,51 @@ const Dashboard = () => {
             Gallons: <Text style={styles.details1}>{data.waterLevel} gal</Text>
           </Text>
           <Text style={styles.details}>
+            Concentration: <Text style={styles.details1}>{data.concentration}</Text>
+          </Text>
+          <Text style={styles.details}>
             Microalgae: <Text style={styles.details1}>{data.microalgaeType}</Text>
           </Text>
           <Text style={styles.details}>
-            Cultivation Date: <Text style={styles.details1}>{data.cultivationDate}</Text>
-          </Text>
+            Cultivation Start: <Text style={styles.details1}>{data.cultivationDate}</Text>
+          </Text>   
         </View>
-      </TouchableOpacity>
-    ));
-  };
+        <View style={styles.dotsdp}>
+          <TouchableOpacity onPress={() => toggleModal(data.idbox)}>
+            <Image style={styles.threedots} source={require('../images/menu.png')} />
+          </TouchableOpacity>
+        </View>
+
+
+ 
+      {/* Popup Menu Modal */}
+      <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible && selectedAquariumId === data.idbox}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <TouchableOpacity
+            style={styles.modalOuter}
+            activeOpacity={1}
+            onPress={() => setModalVisible(false)} // Close modal when tapping outside the choices
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <TouchableOpacity onPress={() => deleteAquarium(data.idbox)}>
+                  <Text style={styles.menuItem}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => setModalVisible(false)}>
+                  <Text style={styles.menuItem}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      
+    </TouchableOpacity>
+  ));
+};
   
 
   const resetAquariumData = async () => {
@@ -175,13 +254,10 @@ const Dashboard = () => {
   return( 
     <SafeAreaView style={styles.container}>
       <StatusBar translucent backgroundColor='transparent' barStyle={'dark-content'}/>
-      <ImageBackground style={styles.bg} resizeMode='cover' source={require('../images/bg.jpg')}>
+      <ImageBackground style={styles.bg} resizeMode='cover' source={require('../images/mybg3.gif')}>
         <View style={styles.header}>
           <TouchableOpacity onPress={aboutscreen}>
             <Image style={styles.logo} source={require('../images/logo1.png')} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={AlertPage}>
-            <Image style={styles.messagebox} source={require('../images/email3.png')} />
           </TouchableOpacity>
           <TouchableOpacity onPress={customscreen}>
             <Image style={styles.plus} source={require('../images/plus.png')} />
@@ -196,7 +272,7 @@ const Dashboard = () => {
             <View style={styles.section1}>
               {renderAquariums()}  
             </View>                
-            </ScrollView>
+            </ScrollView> 
         </View> 
 
         <View style={styles.footer}>
@@ -235,20 +311,13 @@ const styles = StyleSheet.create({
     width: wp(50),
     height: hp(10),
   },
-  messagebox:{
-    resizeMode:'contain',
-    marginLeft: wp(16),
-    //backgroundColor:'orange',
-    width:wp(12),
-    height:hp(5),
-  },
   plus:{
     resizeMode:'contain',
     //display:'flex',
-    marginLeft: hp(2),
+    marginLeft: hp(15),
     //backgroundColor:'orange',
     width:wp(12),
-    height:hp(5),
+    height:hp(7),
   },
   topName:{
     backgroundColor: 'rgba(165,226,121, .8)',
@@ -265,13 +334,31 @@ const styles = StyleSheet.create({
   },
   myAquarium:{
     alignSelf:'center',
+    justifyContent:'center',
     fontSize:hp(2.5),
     marginBottom:hp(1)
   },
   aqua:{
     flexDirection:'column',
-    marginLeft: wp(5)
-    //backgroundColor:'blue'
+    //marginLeft: wp(5),
+    //backgroundColor:'blue',
+    height:hp(20),
+    width:wp(45),
+    justifyContent:'center'
+
+  },
+  dotsdp:{
+    //backgroundColor:'yellow',
+    height:hp(20),
+    width:wp(10)
+
+  },
+  threedots:{
+    width:wp(3),
+    height:hp(3),
+    //backgroundColor:'yellow',
+    marginLeft: wp(3),
+    marginTop: hp(14)
   },
   section1:{
     //flex: 1,
@@ -292,7 +379,7 @@ const styles = StyleSheet.create({
     alignItems:'center',
     //backgroundColor:'white',
     borderRadius: 20,
-    backgroundColor: 'rgba(165,226,121,0.5)',
+    backgroundColor: 'rgba(165,226,121,0.6)',
     borderWidth: hp(0.5),
     borderColor: 'rgba(165,226,121,1)',
     //elevation: hp(1)
@@ -301,9 +388,9 @@ const styles = StyleSheet.create({
     resizeMode:'contain',
     //borderWidth: 1,
     //borderColor:'black',
-    width: wp(30),
-    height: hp(20),
-    marginLeft: wp(3)
+    width: wp(38),
+    height: hp(30),
+    //marginLeft: wp(3)
   },
   details:{
     fontSize: hp(1.8),
@@ -320,6 +407,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#A5E279',
     borderTopRightRadius: 50,
     borderTopLeftRadius: 50,
+  },
+  modalOuter: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)', // Semi-transparent black color
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  modalContent: {
+    backgroundColor: 'white',
+    padding: hp(1),
+    borderRadius: 10,
+    elevation: 5,
+    position: 'absolute',
+  },
+
+  menuItem: {
+    fontSize: 18,
+    paddingVertical: hp(1),
+    paddingHorizontal: wp(5),
   },
   
 })

@@ -39,9 +39,7 @@ export default function HomeScreen(){
             <Text style={styles.subtext2}>Contact us: gingreeves@gmail.com</Text>
         </View>
       </ScrollView>
-      <TouchableOpacity onPress={back} style={styles.back}>
-        <Text style={styles.getStarted}>Go Back</Text>
-      </TouchableOpacity>
+      
     </SafeAreaView>
   )
 }
