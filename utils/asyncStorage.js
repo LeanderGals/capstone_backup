@@ -29,20 +29,6 @@ export const removeItem = async (key) =>{
       }
 }
 
-/*export const displayAsyncStorageData = async () => {
-  try {
-    const keys = await AsyncStorage.getAllKeys();
-    const items = await AsyncStorage.multiGet(keys);
-
-    // Displaying stored data
-    items.forEach(([key, value]) => {
-      console.log(`Key: ${key}, Value: ${value}`);
-    });
-  } catch (error) {
-    console.error('Error retrieving data from AsyncStorage:', error);
-  }
-};*/
-
 
 //clear the data
 export const clearAsyncStorage = async () => {

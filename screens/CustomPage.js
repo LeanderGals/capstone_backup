@@ -10,6 +10,7 @@ import { setItem, getItem } from '../utils/asyncStorage';
 
 
 
+
 const{width, height} = Dimensions.get('window');
 
 const Custom = ({}) => {
@@ -31,8 +32,6 @@ const Custom = ({}) => {
   const [year, setyear] = useState('');  
   const [userdate1, setuserdate1] = useState(''); 
   const [websocketip, setwebsocketip] = useState('');
-  //console.log(aquariumName)
-  //console.log(waterLevel)
 
 
   const data = [
@@ -95,7 +94,6 @@ const Custom = ({}) => {
   ];
 
   const dateYear = [
-    {label:'2023', value:'2023'},
     {label:'2024', value:'2024'},
     {label:'2025', value:'2025'},
     {label:'2026', value:'2026'},
@@ -122,12 +120,26 @@ const Custom = ({}) => {
   ];
 
   const checkTextInput = async () => {
-    //Check for the Name TextInput
+    const check10 = parseInt(await getItem('idbox'))
+    if(check10 > 9){
+      Alert.alert(
+        'Limited Cultivation',
+        'You already have 10 aquariums currently in cultivation. You cannot add anymore.',
+        [
+          {
+            text: 'OK',
+            style: 'cancel',
+          },
+        ],
+        { cancelable: false }
+      );
+    }
+    else{
+
     if (!aquariumName1) {
       alert('Please Enter Aquarium Name');
       return;
     }
-    //Check for the Email TextInput
     if (!waterLevel || waterLevel == 0) {
       alert('Please Enter the Water Level');
       return;
@@ -156,6 +168,7 @@ const Custom = ({}) => {
       alert('Please Enter the IP Address');
       return;
     }
+
     //setuserdate1(month + '/' + day + '/' + year)
     var date1 = new Date().getDate(); //Current Date
     var month1 = new Date().getMonth() + 1; //Current Month
@@ -185,25 +198,28 @@ const Custom = ({}) => {
     
     const currentId = parseInt(await getItem('idbox')) || 0;
     
-    // Increment the ID by 1
+ 
     const newId = currentId + 1;
 
     // Update the ID in AsyncStorage
     setItem('idbox', newId.toString());
     
     const idAsString = currentId.toString();
-    console.log('myid', idAsString)
+    console.log('myid', await getItem('idbox'))
 
+    
     switch (idAsString) {
       case '0':
+        setItem('aqlogname', aquariumName1)
         setItem('umonth', month);
-        setItem('uday', day);
+        setItem('uday', day);   
         setItem('uyear', year);
         setItem('websocketip', websocketip)
         console.log('0myidC', currentId)
         console.log('0myiddddddd', await getItem('idbox'))
         break;
       case '1':
+        setItem('aqlogname1', aquariumName1)
         setItem('umonth1', month);
         setItem('uday1', day);
         setItem('uyear1', year);
@@ -212,6 +228,7 @@ const Custom = ({}) => {
         console.log('1myiddddddd', await getItem('idbox'))
         break;
       case '2':
+        setItem('aqlogname2', aquariumName1)
         setItem('umonth2', month);
         setItem('uday2', day);
         setItem('uyear2', year);
@@ -220,62 +237,70 @@ const Custom = ({}) => {
         console.log('myidddddddhehe', await getItem('idbox'))
         break;
       case '3':
+        setItem('aqlogname3', aquariumName1)
         setItem('umonth3', month);
         setItem('uday3', day);
         setItem('uyear3', year);
         setItem('websocketip3', websocketip)
         break;
       case '4':
+        setItem('aqlogname4', aquariumName1)
         setItem('umonth4', month);
         setItem('uday4', day);
         setItem('uyear4', year);
         setItem('websocketip4', websocketip)
         break;
       case '5':
+        setItem('aqlogname5', aquariumName1)
         setItem('umonth5', month);
         setItem('uday5', day);
         setItem('uyear5', year);
         setItem('websocketip5', websocketip)
         break;
       case '6':
+        setItem('aqlogname6', aquariumName1)
         setItem('umonth6', month);
         setItem('uday6', day);
         setItem('uyear6', year);
         setItem('websocketip6', websocketip)
         break;
       case '7':
+        setItem('aqlogname7', aquariumName1)
         setItem('umonth7', month);
         setItem('uday7', day);
         setItem('uyear7', year);
         setItem('websocketip7', websocketip)
         break;
       case '8':
+        setItem('aqlogname8', aquariumName1)
         setItem('umonth8', month);
         setItem('uday8', day);
         setItem('uyear8', year);
         setItem('websocketip8', websocketip)
         break;
       case '9':
+        setItem('aqlogname9', aquariumName1)
         setItem('umonth9', month)
         setItem('uday9', day)
         setItem('uyear9', year)
         setItem('websocketip9', websocketip)
         break;
       case '10':
+        setItem('aqlogname10', aquariumName1)
         setItem('umonth10', month)
         setItem('uday10', day)
         setItem('uyear10', year)
         setItem('websocketip10', websocketip)
         break;
-      // Add cases for other ID values as needed...
       default:
         break;
     }
   
-    
+   
     
     console.log(userdate1)
     DashboardScreen()
+  }
   };
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisible2, setModalVisible2] = useState(false);
@@ -294,7 +319,7 @@ const Custom = ({}) => {
 
 
   return( 
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar translucent backgroundColor='transparent' barStyle={'dark-content'}/>
       <ImageBackground style={styles.bg} resizeMode='cover' source={require('../images/mybg3.gif')}>
         <View style={styles.header}>
@@ -650,14 +675,14 @@ const Custom = ({}) => {
           </TouchableWithoutFeedback>
         </Modal>
 
-        {/* Icon button to trigger modal */}
+
         <TouchableOpacity
           style={styles.iconButton}
           onPress={() => {
             setModalVisible5(true);
           }}
         >
-          {/* Replace the source with your icon */}
+
           <Image
             source={require('../images/info.png')}
             style={styles.infoIcon}
@@ -690,7 +715,7 @@ const Custom = ({}) => {
         </View>
         
         </ImageBackground>
-    </SafeAreaView>
+    </View>
   )
 }
 export default Custom
@@ -698,41 +723,31 @@ export default Custom
 const styles = StyleSheet.create({
   container:{
     flex: 1,
-    //alignItems: 'center',
-    //backgroundColor: '#C6F3AA'
   },
   bg: {
     flex: 1,
     justifyContent: 'center',
-    
   },
   header:{
     flex: 2,
     flexDirection:'row',
     alignItems:'center',
-    //backgroundColor:'#B5EA91'
-    //backgroundColor:'green'
+    marginTop: hp(3)
   },
   logo:{
     resizeMode:'contain',
-    //marginTop: hp(8),
     marginLeft: hp(1),
-    //marginBottom: hp(2),
     width: wp(50),
     height: hp(10),
   },
   plus:{
     resizeMode:'contain',
-    //display:'flex',
     marginLeft: hp(15),
-    //backgroundColor:'orange',
     width:wp(12),
     height:hp(5),
   },
   middle:{
     flex: 18,
-    //backgroundColor: 'tomato',
-    //alignItems:'center',
   },
   aq1:{
     flexDirection:'row'
@@ -803,7 +818,6 @@ const styles = StyleSheet.create({
   closeButton: {
     alignSelf: 'center',
     paddingTop: hp(3),
-    //backgroundColor: 'red'
   },
   iconButton: {
     marginTop:hp(2), 
@@ -814,16 +828,13 @@ const styles = StyleSheet.create({
     height: hp(3),
     width:wp(7),
     resizeMode: 'contain',
-    //backgroundColor:'yellow'
   },
   aqsize:{
     height: hp(50),
     width:wp(80),
     resizeMode: 'contain',
-    //backgroundColor:'yellow',
   },
   aqsize1:{
-    //backgroundColor:'yellow'
   },
   amountWater: {
     height: hp(5),
@@ -838,7 +849,6 @@ const styles = StyleSheet.create({
   },
   amtWater:{
     flexDirection:'row',
-    //backgroundColor:'orange',
   },
   gallon:{
     fontSize:hp(2),
@@ -851,7 +861,6 @@ const styles = StyleSheet.create({
     height: hp(5),
     borderBottomColor: 'gray',
     borderBottomWidth: hp(0.2),
-    //backgroundColor:'#B5EA91'
   },
   start: {
     backgroundColor: '#34d399',

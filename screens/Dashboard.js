@@ -1,9 +1,9 @@
-import {View, Text, StyleSheet, Dimensions, Image, Alert, Modal, TouchableOpacity, ScrollView, ImageBackground, Button, StatusBar, FlatList} from 'react-native'
+import {View, Text, StyleSheet, Dimensions, Image, Alert, Linking, Modal, TouchableWithoutFeedback, TouchableOpacity, ScrollView, ImageBackground, Button, StatusBar, FlatList} from 'react-native'
 import React, {useState, useEffect}from 'react'
 import  {SafeAreaView} from 'react-native-safe-area-context'
 import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import { useNavigation } from '@react-navigation/native';
-import { getItem } from '../utils/asyncStorage.js';
+import { getItem, setItem } from '../utils/asyncStorage.js';
 import { clearAsyncStorage } from '../utils/asyncStorage.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -19,8 +19,9 @@ const Dashboard = () => {
   const aboutscreen = async ()=>{
     navigation.push('About');
   }
-  const LogsPage = async ()=>{
-    navigation.push('Logs');
+  const cultivation = async ()=>{
+    navigation.push('Cultivation');
+    closeModal()
   }
   const customscreen = async ()=>{
     navigation.push('Custom');
@@ -47,35 +48,74 @@ const Dashboard = () => {
     }
   };
 
-  const saveAquariumData = async (data) => {
-    try {
-      await AsyncStorage.setItem('aquariumData', JSON.stringify(data));
-      console.log(aquariumData)
-    } catch (error) {
-      console.error('Error saving data:', error); 
-    }
-  };
-
+  
   const addAquarium = async () => {
     try { 
+      //setting the ip address of each aquarium
+      switch (await getItem('idbox')) {
+        case '1':
+          const ipadd101 = await getItem('websocketip')
+          setItem('websocketipaddress', ipadd101)
+          break;
+        case '2':
+          const ipadd102 = await getItem('websocketip1')
+          setItem('websocketipaddress', ipadd102)
+          break;
+        case '3':
+          const ipadd103 = await getItem('websocketip2')
+          setItem('websocketipaddress', ipadd103)
+          break;
+        case '4':
+          const ipadd104 = await getItem('websocketip3')
+          setItem('websocketipaddress', ipadd104)
+          break;
+        case '5':
+          const ipadd105 = await getItem('websocketip4')
+          setItem('websocketipaddress', ipadd105)
+          break;
+        case '6':
+          const ipadd106 = await getItem('websocketip5')
+          setItem('websocketipaddress', ipadd106)
+          break;
+        case '7':
+          const ipadd107 = await getItem('websocketip6')
+          setItem('websocketipaddress', ipadd107)
+          break;
+        case '8':
+          const ipadd108 = await getItem('websocketip7')
+          setItem('websocketipaddress', ipadd108)
+          break;
+        case '9':
+          const ipadd109 = await getItem('websocketip8')
+          setItem('websocketipaddress', ipadd109)
+          break;
+        case '10':
+          const ipadd110 = await getItem('websocketip9')
+          setItem('websocketipaddress', ipadd110)
+          break;
+        default:
+          break;
+      }
+
       const newData = {
+        //getting the data from asyncstorage
         idbox: await getItem('idbox'),
         aquariumName: await getItem('aquariumname'),
         waterLevel: await getItem('waterINgallon'),
         concentration: await getItem('concentration'),
         microalgaeType: await getItem('microalgaetype'),
         cultivationDate: await getItem('datecultivate'),
-        webaddress: await getItem('websocketip')
+        webaddress: await getItem('websocketipaddress')
       };
   
-      // Get the current aquarium data from AsyncStorage
+      // get the current aquarium data from AsyncStorage
       const storedData = await AsyncStorage.getItem('aquariumData');
       let currentAquariumData = [];
   
       if (storedData !== null) {
         currentAquariumData = JSON.parse(storedData);
   
-        // Check if the new data already exists in the array
+        // check if the new data already exists in the array
         const exists = currentAquariumData.some(
           (data) =>
             data.aquariumName === newData.aquariumName &&
@@ -117,7 +157,8 @@ const Dashboard = () => {
       setSelectedAquariumId(aquariumId);
       setModalVisible(!modalVisible);
     };
-  
+    
+    //deleting the aquarium in dashboard
     const deleteAquarium = async (aquariumId) => {
       try {
         const storedData = await AsyncStorage.getItem('aquariumData');
@@ -144,7 +185,25 @@ const Dashboard = () => {
         console.error('Error deleting aquarium box:', error);
       }
     };
-
+  
+  //for view what is the ip address
+  const viewipaddress = async (aquariumId) => {
+    try {
+      const storedData = await AsyncStorage.getItem('aquariumData');
+      const currentAquariumData = storedData ? JSON.parse(storedData) : [];
+  
+      const selectedAquarium = currentAquariumData.find((data) => data.idbox === aquariumId);
+  
+      if (selectedAquarium) {
+        // Display the IP address in an alert or other UI element
+        Alert.alert('IP Address', `WebSocket IP Address: ${selectedAquarium.webaddress}`);
+      } else {
+        console.warn('Selected aquarium not found');
+      }
+    } catch (error) {
+      console.error('Error viewing IP address:', error);
+    }
+  }
 
   const renderAquariums = () => {
     const filteredAquariumData = aquariumData.filter(
@@ -164,7 +223,7 @@ const Dashboard = () => {
       try {
         // Save the idboxValue to AsyncStorage before navigating to HomePage
         await AsyncStorage.setItem('idboxValue', idboxValue.toString());
-        navigation.navigate('HomePage', { idbox: idboxValue }); // Pass idbox as a route parameter
+        navigation.navigate('HomePage', { idbox: idboxValue }); 
       } catch (error) {
         console.error('Error saving idbox value:', error);
       }
@@ -198,8 +257,6 @@ const Dashboard = () => {
         </View>
 
 
- 
-      {/* Popup Menu Modal */}
       <Modal
           animationType="slide"
           transparent={true}
@@ -209,10 +266,13 @@ const Dashboard = () => {
           <TouchableOpacity
             style={styles.modalOuter}
             activeOpacity={1}
-            onPress={() => setModalVisible(false)} // Close modal when tapping outside the choices
+            onPress={() => setModalVisible(false)} 
           >
             <View style={styles.modalContainer}>
               <View style={styles.modalContent}>
+                <TouchableOpacity onPress={() => viewipaddress(data.idbox)}>
+                  <Text style={styles.menuItem}>View IP Address</Text>
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => deleteAquarium(data.idbox)}>
                   <Text style={styles.menuItem}>Delete</Text>
                 </TouchableOpacity>
@@ -246,13 +306,19 @@ const Dashboard = () => {
     setAllItems(updatedTodos);
     saveTodoItems(updatedTodos); // Save updated todo items to AsyncStorage
   };
-  
-  //console.log('1 ', aquariumData) 
-
-  
+  const [modalVisible1, setModalVisible1] = useState(false);
+    const closeModal = () => {
+      setModalVisible1(false);
+    }
+    const presslink = () =>{
+      Linking.openURL('mailto:asklumotech@gmail.com');
+    }
+    const presslink2 = () =>{
+      Linking.openURL('https://youtu.be/jvws3gEnBvU');
+    }
   
   return( 
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar translucent backgroundColor='transparent' barStyle={'dark-content'}/>
       <ImageBackground style={styles.bg} resizeMode='cover' source={require('../images/mybg3.gif')}>
         <View style={styles.header}>
@@ -262,6 +328,44 @@ const Dashboard = () => {
           <TouchableOpacity onPress={customscreen}>
             <Image style={styles.plus} source={require('../images/plus.png')} />
           </TouchableOpacity>
+          <Modal
+            animationType = 'none'
+            transparent={true}
+            visible={modalVisible1}
+            onRequestClose={() => {
+              setModalVisible1(!modalVisible1);
+            }}
+            >
+            <TouchableWithoutFeedback onPress={closeModal}>
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                    <TouchableOpacity style={styles.closeButton1} onPress={cultivation}>
+                      <Text style={styles.infoclose}>Cultivation</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.closeButton} onPress={presslink2}>
+                      <Text style={styles.infoclose}>Tutorial</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.closeButton} onPress={presslink}>
+                      <Text style={styles.infoclose}>Feedback</Text>
+                    </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+
+          {/* Icon button to trigger modal */}
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={() => {
+              setModalVisible1(true);
+            }}
+          >
+          {/* Replace the source with your icon */}
+          <Image
+            source={require('../images/menu.png')}
+            style={styles.infoIcon}
+          />
+        </TouchableOpacity>
         </View>
 
         <View style={styles.middle}>
@@ -279,7 +383,7 @@ const Dashboard = () => {
 
         </View>
         </ImageBackground>
-    </SafeAreaView>
+    </View>
   )
 }
 
@@ -289,8 +393,6 @@ export default Dashboard
 const styles = StyleSheet.create({
   container:{
     flex: 1,
-    //alignItems: 'center',
-    //backgroundColor: '#C6F3AA'
   },
   bg: {
     flex: 1,
@@ -300,24 +402,85 @@ const styles = StyleSheet.create({
     flex: 2,
     flexDirection:'row',
     alignItems:'center',
-    //backgroundColor:'#B5EA91'
-    //backgroundColor:'green'
+    marginTop: hp(3)
   },
   logo:{
     resizeMode:'contain',
-    //marginTop: hp(8),
     marginLeft: hp(1),
-    //marginBottom: hp(2),
     width: wp(50),
     height: hp(10),
+    //backgroundColor:'yellow'
   },
   plus:{
     resizeMode:'contain',
-    //display:'flex',
-    marginLeft: hp(15),
-    //backgroundColor:'orange',
-    width:wp(12),
+    marginLeft: wp(21),
+    width:wp(13),
     height:hp(7),
+    //backgroundColor: 'blue'
+  },
+  centeredView: {
+    flex: 1,
+    //justifyContent: 'center',
+    //alignItems: 'center',
+  },
+  modalView: {
+    backgroundColor: 'white',
+    marginTop: hp(8),
+    marginLeft: wp(65),
+    borderRadius: 20,
+    //padding: hp(3),
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: hp(2),
+    maxWidth: wp(30), 
+  },
+  aqsize:{
+    height: hp(50),
+    width:wp(80),
+    resizeMode: 'contain',
+  },
+  iconButton: {
+    //marginTop:hp(), 
+    marginLeft: wp(4),
+  },
+  infoIcon: {
+    height: hp(5),
+    width:wp(8),
+    resizeMode: 'contain',
+  },
+  infoclose:{
+    fontSize:hp(1.7),
+    fontWeight:'bold',
+    alignSelf:'center',
+  },
+  infotext:{
+    fontSize:hp(1.7),
+    alignSelf:'flex-start',
+  },
+  closeButton: {
+    alignSelf: 'flex-start',
+    padding: hp(1.5),
+    //paddingLeft: wp(3),
+    // /marginLeft: wp(3),
+    width: wp(30),
+    //backgroundColor: 'yellow',
+    //borderBottomWidth: 1
+  },
+  closeButton1: {
+    alignSelf: 'flex-start',
+    padding: hp(1.5),
+    //paddingLeft: wp(3),
+    // /marginLeft: wp(3),
+    width: wp(30),
+    //padding: hp(1),
+    //borderBottomWidth: 1
+
   },
   topName:{
     backgroundColor: 'rgba(165,226,121, .8)',
@@ -330,7 +493,6 @@ const styles = StyleSheet.create({
   },
   middle:{
     flex: 15,
-    //backgroundColor: 'tomato',
   },
   myAquarium:{
     alignSelf:'center',
@@ -340,15 +502,12 @@ const styles = StyleSheet.create({
   },
   aqua:{
     flexDirection:'column',
-    //marginLeft: wp(5),
-    //backgroundColor:'blue',
     height:hp(20),
     width:wp(45),
     justifyContent:'center'
 
   },
   dotsdp:{
-    //backgroundColor:'yellow',
     height:hp(20),
     width:wp(10)
 
@@ -356,14 +515,11 @@ const styles = StyleSheet.create({
   threedots:{
     width:wp(3),
     height:hp(3),
-    //backgroundColor:'yellow',
     marginLeft: wp(3),
     marginTop: hp(14)
   },
   section1:{
-    //flex: 1,
     alignItems:'center',
-    //backgroundColor:'blue',
   },
   all:{
     flexDirection:'row'
@@ -372,25 +528,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     margin:hp(0.5),
     marginBottom:hp(1),
-    //borderWidth: 1,
-    //borderColor:'black',
     width: wp(95),
     height: hp(20),
     alignItems:'center',
-    //backgroundColor:'white',
     borderRadius: 20,
     backgroundColor: 'rgba(165,226,121,0.6)',
     borderWidth: hp(0.5),
     borderColor: 'rgba(165,226,121,1)',
-    //elevation: hp(1)
   },
   a1:{
     resizeMode:'contain',
-    //borderWidth: 1,
-    //borderColor:'black',
     width: wp(38),
     height: hp(30),
-    //marginLeft: wp(3)
   },
   details:{
     fontSize: hp(1.8),
@@ -403,14 +552,13 @@ const styles = StyleSheet.create({
 
   footer:{
     flex: 1,
-    //backgroundColor: 'blue',
     backgroundColor: '#A5E279',
     borderTopRightRadius: 50,
     borderTopLeftRadius: 50,
   },
   modalOuter: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)', // Semi-transparent black color
+    backgroundColor: 'rgba(0, 0, 0, 0.2)', 
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -433,6 +581,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     paddingVertical: hp(1),
     paddingHorizontal: wp(5),
+    alignSelf:'center'
   },
   
 })
